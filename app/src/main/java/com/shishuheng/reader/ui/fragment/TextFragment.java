@@ -47,7 +47,7 @@ import java.util.ArrayList;
 public class TextFragment extends Fragment {
     private Activity rootActivity = null;
 
-    private ReadView mainDisplay;
+    public ReadView mainDisplay;
 
     private LinearLayout textMenu;
     private GestureDetector gestureDetector;
@@ -62,7 +62,7 @@ public class TextFragment extends Fragment {
 
     private int textSizePixel = 48;
 
-    ArrayList<String> text = null;
+    public ArrayList<String> text = null;
 
     private Book currenBook;
 
@@ -256,6 +256,9 @@ public class TextFragment extends Fragment {
                 txt.setHasReadPointer(progress);
                 book.setTotality(progress);
 
+                if (book.bookFullScreen.size() >= 0)
+                    txt.setFirstLineLastExit(book.bookFullScreen.get(0) + book.bookFullScreen.get(1) + book.bookFullScreen.get(3));
+
                 //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
                 NumberFormat percentageFormat = NumberFormat.getPercentInstance();
                 percentageFormat.setMaximumFractionDigits(2);
@@ -390,7 +393,7 @@ public class TextFragment extends Fragment {
         String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
         mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
-        if (book.bookFullScreen.size() > 0)
+        if (book.bookFullScreen.size() >= 0)
             txt.setFirstLineLastExit(book.bookFullScreen.get(0) + book.bookFullScreen.get(1) + book.bookFullScreen.get(3));
 
         return 0;
@@ -417,7 +420,7 @@ public class TextFragment extends Fragment {
         String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
         mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
-        if (book.bookFullScreen.size() > 0)
+        if (book.bookFullScreen.size() >= 0)
             txt.setFirstLineLastExit(book.bookFullScreen.get(0) + book.bookFullScreen.get(1) + book.bookFullScreen.get(3));
 
         return 0;

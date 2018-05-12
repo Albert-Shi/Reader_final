@@ -5,10 +5,24 @@
     android:padding="@dimen/activity_horizontal_margin"
     android:id="@+id/item_bookmark">
     <TextView
+        android:textColor="@color/colorAccent"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:gravity="center_vertical"
+        android:textSize="12dp"
+        android:id="@+id/item_bookmark_percentage"/>
+
+    <View
+        android:layout_width="8dp"
+        android:layout_height="match_parent"/>
+
+    <TextView
+        android:textColor="@color/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical"
-        android:textSize="20dp"
-        android:id="@+id/item_menu_text"/>
+        android:textSize="14dp"
+        android:id="@+id/item_bookmark_text"/>
 </LinearLayout>

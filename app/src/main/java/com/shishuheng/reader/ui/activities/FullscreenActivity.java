@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -43,6 +44,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.shishuheng.reader.R;
+import com.shishuheng.reader.adapter.BookmarkAdapter;
 import com.shishuheng.reader.datastructure.ActivitySerializable;
 import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
@@ -56,6 +58,7 @@ import com.shishuheng.reader.ui.fragment.TextFragment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -71,6 +74,10 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
     private OfficeFragment officeFragment;
 
     private int textSize_Settings = 3;
+
+    final List<Map<String, String>> bookmarkList = new ArrayList<>();
+    private ListView bookmarklistView;
+    private BookmarkAdapter bookmarkAdapter;
 
     //电池信息接收器
     private BroadcastReceiver batteryReceiver;
@@ -327,6 +334,7 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
 
     public void startFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction().add(R.id.fullscreen_content, fragment).commit();
+        setBookmarkListView();
     }
 
     public void setTextContent() {
@@ -423,7 +431,10 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         viewPager = (ViewPager) findViewById(R.id.viewpager_fullscreen);
         LayoutInflater inflater = getLayoutInflater();
         controller = inflater.inflate(R.layout.controller, null);
+
         bookmark = inflater.inflate(R.layout.bookmarks, null);
+        bookmarklistView = bookmark.findViewById(R.id.listView_bookmark);
+
         setBookMark(bookmark, data);
 
         viewList = new ArrayList<>();
@@ -460,12 +471,50 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         addBookmarkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean flag = operator.addBookmark(currentTxt.getPath(), currentTxt.getFirstLineLastExit(), currentTxt.getHasReadPointer());
+                String text = textFragment.getCurrenBook().bookFullScreen.get(0) + textFragment.getCurrenBook().bookFullScreen.get(1) + textFragment.getCurrenBook().bookFullScreen.get(2);
+                text = text.replace("\r", " ").replace("\n", " ");
+                boolean flag = operator.addBookmark(currentTxt.getPath(), text, textFragment.getCurrenBook().getReadPointer());
                 if (flag == true) {
+                    bookmarkList.clear();
+                    operator.getBookmarks(currentTxt.getPath(), bookmarkList);
+                    bookmarkAdapter.notifyDataSetChanged();
                     showToast("添加成功");
                 }
             }
         });
+    }
+
+    public void setBookmarkListView() {
+        if (operator.getBookmarks(currentTxt.getPath(),bookmarkList)) {
+            bookmarkAdapter = new BookmarkAdapter(this, bookmarkList);
+            bookmarklistView.setAdapter(bookmarkAdapter);
+            bookmarklistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Integer pos = Integer.valueOf(bookmarkList.get(position).get("position"));
+                    currentTxt.setHasReadPointer(pos);
+                    textFragment.text.clear();
+                    textFragment.text = textFragment.getCurrenBook().readByte(pos);
+                    textFragment.mainDisplay.setText(textFragment.text);
+                    currentTxt.setHasReadPointer(pos);
+                    textFragment.getCurrenBook().setTotality(pos);
+
+                    if (textFragment.getCurrenBook().bookFullScreen.size() >= 0)
+                        currentTxt.setFirstLineLastExit(textFragment.getCurrenBook().bookFullScreen.get(0) + textFragment.getCurrenBook().bookFullScreen.get(1) + textFragment.getCurrenBook().bookFullScreen.get(3));
+                }
+            });
+
+            bookmarklistView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    operator.deleteRecord(operator.TABLE_BOOKMARKS, "readPointer", bookmarkList.get(position).get("position"));
+                    bookmarkList.remove(position);
+                    bookmarkAdapter.notifyDataSetChanged();
+                    showToast("已删除书签");
+                    return true;
+                }
+            });
+        }
     }
 
     public void setBookMark(View bookmark, List<String> data) {

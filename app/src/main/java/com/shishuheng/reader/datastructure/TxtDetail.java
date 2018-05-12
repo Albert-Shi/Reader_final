@@ -71,7 +71,7 @@ public class TxtDetail implements Serializable {
         book.setName(name);
         book.setTotality(totality);
         book.setFilePath(new File(path));
-        if (book.bookFullScreen.size() > 0)
-            firstLineLastExit = book.bookFullScreen.get(0) + book.bookFullScreen.get(1) + book.bookFullScreen.get(3);
+//        if (book.bookFullScreen.size() >= 0)
+//            firstLineLastExit = book.bookFullScreen.get(0) + book.bookFullScreen.get(1) + book.bookFullScreen.get(3);
     }
 }

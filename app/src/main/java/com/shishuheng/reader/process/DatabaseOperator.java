@@ -10,7 +10,10 @@ import android.util.Log;
 import com.shishuheng.reader.datastructure.TxtDetail;
 
 import java.io.File;
+import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shishuheng on 2018/1/27.
@@ -128,19 +131,53 @@ public class DatabaseOperator {
         }
     }
 
-    public boolean addBookmark(String path,String text, long position) {
+    public Integer findBookIdByPath(String path) {
         String queryId = "select id from Books where path=?";
         cursor = db.rawQuery(queryId, new String[]{ path });
         cursor.moveToFirst();
         Integer id = cursor.getInt(cursor.getColumnIndex("id"));
+        return id;
+    }
+
+    public boolean addBookmark(String path,String text, long position) {
+        Integer id = findBookIdByPath(path);
         if (id != null) {
             ContentValues values = new ContentValues();
             values.put("bookId", id);
             values.put("readPointer", position);
             values.put("text", text);
             db.insert(TABLE_BOOKMARKS, null, values);
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    public boolean getBookmarks(String path, List<Map<String, String>> bookmarkList) {
+        Integer id = findBookIdByPath(path);
+        if (id != null) {
+            bookmarkList.clear();
+            String query = "select * from Bookmarks where bookId=?";
+            cursor = db.rawQuery(query, new String[]{id.toString()});
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                File file = new File(path);
+                Integer pos = cursor.getInt(cursor.getColumnIndex("readPointer"));
+                Float fpos = Float.valueOf(pos);
+                //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
+                NumberFormat percentageFormat = NumberFormat.getPercentInstance();
+                percentageFormat.setMaximumFractionDigits(2);
+                String percentage = percentageFormat.format(fpos/file.length());
+                String text = cursor.getString(cursor.getColumnIndex("text"));
+                Map<String, String> map = new HashMap<>();
+                map.put("position", pos.toString());
+                map.put("percentage", percentage);
+                map.put("text", text);
+                bookmarkList.add(map);
+                cursor.moveToNext();
+            }
+            return true;
+        }
+        return false;
     }
 
     public void close() {
