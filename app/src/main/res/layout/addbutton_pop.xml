@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="120dp"
+    android:layout_height="120dp">
+    <android.support.v7.widget.CardView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:cardCornerRadius="10dp"
+        android:elevation="10dp"
+        app:cardMaxElevation="10dp"
+        android:layout_margin="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="添加文件"
+                android:id="@+id/add_addButton"
+                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="编辑模式"
+                android:id="@+id/edit_addButton"
+                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,44 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#ffffff"
+    tools:context="com.shishuheng.reader.ui.fragment.TextFragment"
+    android:id="@+id/container_fragment">
+
+    <!-- TODO: Update blank fragment layout -->
+        <android.support.v7.widget.CardView
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/card"
+            android:layout_margin="20px"
+            app:cardCornerRadius="20px"
+            app:cardBackgroundColor="#f0ebd5">
+            <!--
+            <com.shishuheng.reader.ui.coustomize.ReaderTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="16dp"
+                android:textColor="#f13d1a00"
+                android:id="@+id/text_container"
+                android:text="看到这个表明APP出错啦"
+                android:elevation="5dp"
+                android:scrollbars="vertical"
+                android:scrollbarStyle="outsideInset"
+                android:layout_gravity="center"
+                android:textIsSelectable="true"
+                android:paddingTop="20px"
+                android:paddingLeft="20px"
+                android:paddingBottom="5px"/>
+                -->
+        </android.support.v7.widget.CardView>
+<!--
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"></LinearLayout>
+-->
+</FrameLayout>

@@ -1,0 +1,31 @@
+
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.shishuheng.reader.ui.fragment.HomeFragment">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:textColor="@color/colorAccent"
+            android:text="所有书籍" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2.5dp"
+            android:background="@drawable/head_gradient"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"></View>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/refreshLayout">
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/display_listView"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
+    </LinearLayout>

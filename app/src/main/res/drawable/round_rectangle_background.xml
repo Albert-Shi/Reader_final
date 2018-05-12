@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--此处参考 http://blog.csdn.net/c351512965/article/details/47858319-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" >
+    <corners android:radius="8dp"/>
+    <solid android:color="#ffffff"/>
+</shape>
