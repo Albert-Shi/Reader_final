@@ -1,11 +1,20 @@
 package com.shishuheng.reader.process;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,6 +40,7 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by shishuheng on 2018/1/2.
@@ -248,5 +258,61 @@ public class Utilities {
         percentageFormat.setMaximumFractionDigits(2);
         String result = percentageFormat.format(temp) +" "+ unit;
         return result;
+    }
+
+    // 判断是否安装wps
+    public static boolean isWpsInstalled(Context context) {
+        boolean isInstall = false;
+        List<PackageInfo> list = context.getPackageManager().getInstalledPackages(
+                PackageManager.GET_PERMISSIONS);
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (PackageInfo packageInfo : list) {
+            stringBuilder.append("package name:" + packageInfo.packageName
+                    + "\n");
+            ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+            stringBuilder.append("应用名称:"
+                    + applicationInfo.loadLabel(context.getPackageManager()) + "\n");
+            if (packageInfo.permissions != null) {
+
+                for (PermissionInfo p : packageInfo.permissions) {
+                    stringBuilder.append("权限包括:" + p.name + "\n");
+                }
+            }
+            stringBuilder.append("\n");
+            if ("cn.wps.moffice_eng".equals(packageInfo.packageName)) {
+                isInstall = true;
+            }
+        }
+        System.out.println(isInstall);
+        return isInstall;
+    }
+
+    public static boolean useWpsOpenFile(String path, Context context) {
+        Intent intent = new Intent();
+        Bundle bundle = new Bundle();
+        bundle.putString("OpenMode", "ReadOnly");
+        bundle.putString("ThirdPackage", context.getPackageName());
+        bundle.putBoolean("ClearTrace", true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setClassName("cn.wps.moffice_eng",
+                "cn.wps.moffice.documentmanager.PreStartActivity");
+        File file = new File(path);
+        if (file == null || !file.exists()) {
+            return false;
+        }
+        Uri uri = FileProvider.getUriForFile(context, "com.shishuheng.reader.fileProvider", file);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setData(uri);
+        intent.putExtras(bundle);
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

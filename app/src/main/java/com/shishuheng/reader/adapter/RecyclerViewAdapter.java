@@ -22,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.TxtDetail;
@@ -107,11 +108,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         holder.checkBox.setChecked(true);
                 } else {
                     if (!holder.occupy) {
-                        Intent intent = new Intent(mainActivity, FullscreenActivity.class);
-                        intent.putExtra("currentTextDetail", mData.get(position));
-                        intent.putExtra("TextSize", mData.get(position));
-                        mainActivity.currentTxt = mData.get(position);
-                        mainActivity.startActivity(intent);
+                        String extension = mData.get(position).getName().substring(mData.get(position).getName().lastIndexOf('.'));
+                        //若安装了wps则用wps打开office文档
+                        if ((extension.equals(".xls") || extension.equals(".xlsx") || extension.equals(".ppt") || extension.equals(".pptx")) || mainActivity.getInstalledWps() == false) {
+                            Toast.makeText(mainActivity, "未安装WPS，无法打开文件", Toast.LENGTH_SHORT).show();
+                        } else if (extension != null && (extension.equals(".doc") || extension.equals(".docx") || extension.equals(".xls") || extension.equals(".xlsx") || extension.equals(".ppt") || extension.equals(".pptx")) && mainActivity.getInstalledWps()) {
+                            Utilities.useWpsOpenFile(mData.get(position).getPath(), mainActivity);
+                        } else {
+                            Intent intent = new Intent(mainActivity, FullscreenActivity.class);
+                            intent.putExtra("currentTextDetail", mData.get(position));
+                            intent.putExtra("TextSize", mData.get(position));
+                            mainActivity.currentTxt = mData.get(position);
+                            mainActivity.startActivity(intent);
+                        }
                     }
                 }
             }

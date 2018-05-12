@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity
     private HomeFragment homeFragment = null;
     private MainActivity activity = this;
 
+    private Boolean isInstalledWps;
+
     //悬浮按钮相关控件
     private PopupWindow popupWindow;
     private Button addButton_popupWindow;
@@ -185,6 +187,8 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+        isInstalledWps = Utilities.isWpsInstalled(this);
+
         FragmentManager fm = getSupportFragmentManager();
         homeFragment = new HomeFragment();
         fm.beginTransaction().replace(R.id.content_main, homeFragment).commit();
@@ -272,5 +276,13 @@ public class MainActivity extends AppCompatActivity
 
     public View getAddButtonView() {
         return addButtonView;
+    }
+
+    public Boolean getInstalledWps() {
+        return isInstalledWps;
+    }
+
+    public void setInstalledWps(Boolean installedWps) {
+        isInstalledWps = installedWps;
     }
 }

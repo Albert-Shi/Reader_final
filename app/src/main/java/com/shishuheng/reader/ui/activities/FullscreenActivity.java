@@ -1,18 +1,25 @@
 package com.shishuheng.reader.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -55,6 +62,7 @@ import com.shishuheng.reader.ui.fragment.OfficeFragment;
 import com.shishuheng.reader.ui.fragment.PdfFragment;
 import com.shishuheng.reader.ui.fragment.TextFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -243,6 +251,7 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
                 setPDFView(currentTxt);
             } else if (extension.equalsIgnoreCase(".doc") || extension.equalsIgnoreCase(".docx")) {
                 setOfficeView(currentTxt.getPath());
+//                useWpsOpenFile(currentTxt.getPath());
             }
         }
 
@@ -472,7 +481,7 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
             @Override
             public void onClick(View v) {
                 String text = textFragment.getCurrenBook().bookFullScreen.get(0) + textFragment.getCurrenBook().bookFullScreen.get(1) + textFragment.getCurrenBook().bookFullScreen.get(2);
-                text = text.replace("\r", " ").replace("\n", " ");
+                text = text.replace("\r", " ").replace("\n", " ") + "……";
                 boolean flag = operator.addBookmark(currentTxt.getPath(), text, textFragment.getCurrenBook().getReadPointer());
                 if (flag == true) {
                     bookmarkList.clear();
