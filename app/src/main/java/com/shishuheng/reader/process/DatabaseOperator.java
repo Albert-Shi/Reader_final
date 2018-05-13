@@ -36,7 +36,7 @@ public class DatabaseOperator {
         db = helper.getWritableDatabase();
     }
 
-    public synchronized int getInt(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
+    public int getInt(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
         int r = -1;
         String query = "select " +field+ " from " +table+ " where " +field_PrimaryKey+ "=?";
         cursor = db.rawQuery(query, new String[] {value_PrimaryKey});

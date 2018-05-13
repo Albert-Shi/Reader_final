@@ -20,7 +20,7 @@ public class BookInformationDatabaseOpenHelper extends SQLiteOpenHelper {
             + "codingFormat integer,"
             + "totality integer)";
 
-    private static String CREAT_BOOKMARK = "create table Bookmarks("
+    private static String CREAT_BOOKMARK = "create table BookMarks("
             + "id integer primary key autoincrement,"
             + "bookId integer,"
             + "readPointer integer,"
@@ -28,9 +28,9 @@ public class BookInformationDatabaseOpenHelper extends SQLiteOpenHelper {
             + "FOREIGN KEY (bookId) REFERENCES Books(id))";
 
     private static String CREAT_SETTING = "create table Settings("
-            + "id integer primary key autoincrement,"
-            + "nightMode integer,"
-            + "textSize integer)";
+            + "id integer primary key default 1,"
+            + "nightMode integer default 0,"
+            + "textSize integer default 3)";
 
     private Context mContext;
 

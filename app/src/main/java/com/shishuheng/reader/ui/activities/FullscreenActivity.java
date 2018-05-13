@@ -1,40 +1,24 @@
 package com.shishuheng.reader.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.FileProvider;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Layout;
-import android.text.method.ScrollingMovementMethod;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,11 +27,10 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.shishuheng.reader.R;
@@ -57,14 +40,11 @@ import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
 import com.shishuheng.reader.process.DatabaseOperator;
 import com.shishuheng.reader.process.Utilities;
-import com.shishuheng.reader.ui.coustomize.ReadView;
 import com.shishuheng.reader.ui.fragment.OfficeFragment;
 import com.shishuheng.reader.ui.fragment.PdfFragment;
 import com.shishuheng.reader.ui.fragment.TextFragment;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +52,38 @@ import java.util.Map;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class FullscreenActivity extends AppCompatActivity {
+    /**
+     * Whether or not the system UI should be auto-hidden after
+     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
+     */
+    private static final boolean AUTO_HIDE = true;
+    /**
+     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
+     * user interaction before hiding the system UI.
+     */
+    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    /**
+     * Some older devices needs a small delay between UI widget updates
+     * and a change of the status and navigation bar.
+     */
+    private static final int UI_ANIMATION_DELAY = 300;
+    final List<Map<String, String>> bookmarkList = new ArrayList<>();
+    private final Handler mHideHandler = new Handler();
+    /**
+     * Touch listener to use for in-layout UI controls to delay hiding the
+     * system UI. This is to prevent the jarring behavior of controls going away
+     * while interacting with activity UI.
+     */
+    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            if (AUTO_HIDE) {
+                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+            }
+            return false;
+        }
+    };
     private MainActivity mainActivity;
     private TxtDetail currentTxt;
     private int position;
@@ -80,44 +91,20 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
     private ActivitySerializable activitySerializable;
     private TextFragment textFragment;
     private OfficeFragment officeFragment;
-
     private int textSize_Settings = 3;
-
-    final List<Map<String, String>> bookmarkList = new ArrayList<>();
+    private int nightModeCode;
     private ListView bookmarklistView;
     private BookmarkAdapter bookmarkAdapter;
-
     //电池信息接收器
     private BroadcastReceiver batteryReceiver;
     //电量百分比
     private String batteryPercent = "正在获取数据";
-
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
     private View controller;
     private View bookmark;
     private ArrayList<View> viewList;
-
     private DatabaseOperator operator;
-
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
     private View mContentView;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
@@ -153,20 +140,6 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         @Override
         public void run() {
             hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
         }
     };
 
@@ -228,6 +201,7 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         currentTxt.setCodingFormat(operator.getInt(DatabaseOperator.TABLE_BOOKS, "codingFormat", "path", currentTxt.getPath()));
         currentTxt.setTotality(operator.getInt(DatabaseOperator.TABLE_BOOKS, "totality", "path", currentTxt.getPath()));
         textSize_Settings = operator.getInt(DatabaseOperator.TABLE_SETTINGS, "textSize", "id", 1 + "");
+        nightModeCode = operator.getInt(DatabaseOperator.TABLE_SETTINGS, "nightMode", "id", 1 + "");
 
         //创建电池信息接收器 此处参考 http://www.jb51.net/article/72799.htm
         batteryReceiver = new BroadcastReceiver() {
@@ -317,28 +291,28 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    public void setMainActivity(MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
-
     public MainActivity getMainActivity() {
         return mainActivity;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
     public int getPosition() {
         return position;
     }
 
-    public void setTxtDetail(TxtDetail txtDetail) {
-        this.currentTxt = txtDetail;
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public TxtDetail getTxtDetail() {
         return currentTxt;
+    }
+
+    public void setTxtDetail(TxtDetail txtDetail) {
+        this.currentTxt = txtDetail;
     }
 
     public void startFragment(Fragment fragment) {
@@ -383,11 +357,16 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
             BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
             SQLiteDatabase db = helper.getReadableDatabase();
 
-            String q = "select readPointer from Books where path=?";
             ContentValues values = new ContentValues();
             values.put("readPointer", currentTxt.getHasReadPointer());
             values.put("codingFormat", currentTxt.getCodingFormat());
             db.update("Books", values, "path=?", new String[]{currentTxt.getPath()});
+
+            ContentValues settingValue = new ContentValues();
+            settingValue.put("nightMode", nightModeCode);
+            settingValue.put("textSize", textSize_Settings);
+            db.update(DatabaseOperator.TABLE_SETTINGS, settingValue, "id=?", new String[]{1 + ""});
+
             db.close();
 
             //注销电池信息接收器
@@ -419,21 +398,6 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
         PdfFragment pdfFragment = new PdfFragment();
         pdfFragment.setFile(detail);
         startFragment(pdfFragment);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-//        if (id == R.id.nav_addFromFolder) {
-//            Utilities.getDirectoryBookFiles(this);
-//            Toast.makeText(this, "添加完成，请手动下拉刷新书籍列表", Toast.LENGTH_SHORT).show();
-//        }
-//
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.fullscreen_drawer_layout);
-//        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     public void setViewPager(List<String> data) {
@@ -491,10 +455,46 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
                 }
             }
         });
+
+        //查找功能
+        final EditText findEditText = controller.findViewById(R.id.findText_editText);
+        findEditText.clearFocus();
+        ImageView findButton = controller.findViewById(R.id.findText_button);
+        findButton.setImageResource(R.drawable.search_button);
+        findButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = "";
+                String p = findEditText.getText().toString();
+                if (!(p.equals("") && p.equals("\n"))) {
+                    for (int i = 0; i < textFragment.getCurrenBook().bookFullScreen.size(); i++) {
+                        text += textFragment.getCurrenBook().bookFullScreen.get(i);
+                    }
+                    Integer index = text.indexOf(p);
+                    if (index == -1) {
+                        showToast("未找到内容");
+                    } else {
+                        int count = 0;
+                        for (int i = 0; i < textFragment.getCurrenBook().bookFullScreen.size(); i++) {
+                            int lineCount = textFragment.getCurrenBook().bookFullScreen.get(i).length();
+                            if (count + lineCount >= index) {
+                                showToast("出现在第 " + (i + 1) + " 行，第 " + (index - count) + " 列");
+                                index = text.indexOf(findEditText.getText().toString(), (index + p.length()));
+                                if (index == -1) {
+                                    break;
+                                }
+                            } else {
+                                count += lineCount;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     public void setBookmarkListView() {
-        if (operator.getBookmarks(currentTxt.getPath(),bookmarkList)) {
+        if (operator.getBookmarks(currentTxt.getPath(), bookmarkList)) {
             bookmarkAdapter = new BookmarkAdapter(this, bookmarkList);
             bookmarklistView.setAdapter(bookmarkAdapter);
             bookmarklistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -528,7 +528,7 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
 
     public void setBookMark(View bookmark, List<String> data) {
         ListView listView = bookmark.findViewById(R.id.listView_bookmark);
-        ListAdapter adapter = new ArrayAdapter<String>(this, R.layout.item_bookmark,data);
+        ListAdapter adapter = new ArrayAdapter<String>(this, R.layout.item_bookmark, data);
         listView.setAdapter(adapter);
     }
 
@@ -550,5 +550,13 @@ public class FullscreenActivity extends AppCompatActivity implements NavigationV
 
     public void showToast(String text) {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public int getNightModeCode() {
+        return nightModeCode;
+    }
+
+    public void setNightModeCode(int nightModeCode) {
+        this.nightModeCode = nightModeCode;
     }
 }

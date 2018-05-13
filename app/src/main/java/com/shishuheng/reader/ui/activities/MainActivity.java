@@ -248,6 +248,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_addFromFolder) {
             Utilities.getDirectoryBookFiles(this);
             Toast.makeText(this, "添加完成，请手动下拉刷新书籍列表", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_exit) {
+            System.exit(1);
         }
         /*
         else if (id == R.id.nav_slideshow) {

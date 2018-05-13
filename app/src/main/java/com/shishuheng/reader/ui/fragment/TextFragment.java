@@ -1,23 +1,15 @@
 package com.shishuheng.reader.ui.fragment;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
-import android.text.Layout;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
@@ -32,50 +24,34 @@ import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.ScreenSize;
 import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.Book;
-import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
 import com.shishuheng.reader.process.Utilities;
-import com.shishuheng.reader.ui.coustomize.ReadView;
-import com.shishuheng.reader.ui.coustomize.ReaderTextView;
 import com.shishuheng.reader.ui.activities.FullscreenActivity;
+import com.shishuheng.reader.ui.coustomize.ReadView;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
 //用于显示具体文字的页面
 public class TextFragment extends Fragment {
-    private Activity rootActivity = null;
-
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
     public ReadView mainDisplay;
-
-    private LinearLayout textMenu;
-    private GestureDetector gestureDetector;
-
-    public LinearLayout getTextMenu() {
-        return textMenu;
-    }
-
-    private int displayLineNumber = 0;
-
-    private ScreenSize screenSize;
-
-    private int textSizePixel = 48;
-
     public ArrayList<String> text = null;
-
-    private Book currenBook;
-
-    private SeekBar seekBar = null;
-    //显示进度条百分百
-    private TextView seekBarPercentage = null;
     //进度条百分比
     String percentage;
-
-
-
     //获取页面设置参数
     CardView card;
+    TxtDetail txt;
+    int lineCharacterNumber;
+    int lineTotalNumber;
+    private Activity rootActivity = null;
+    private LinearLayout textMenu;
+    private GestureDetector gestureDetector;
+    private int displayLineNumber = 0;
+    private ScreenSize screenSize;
 
     /*
     float textSize;
@@ -86,20 +62,16 @@ public class TextFragment extends Fragment {
     float paddingLeft;
     float paddingRight;
     */
-
-    TxtDetail txt;
-    int lineCharacterNumber;
-    int lineTotalNumber;
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
+    private int textSizePixel = 48;
+    private Book currenBook;
+    private SeekBar seekBar = null;
+    //显示进度条百分百
+    private TextView seekBarPercentage = null;
+    private FrameLayout layout;
+    private CheckBox checkBox;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
 
     /**
      * Use this factory method to create a new instance of
@@ -117,6 +89,10 @@ public class TextFragment extends Fragment {
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public LinearLayout getTextMenu() {
+        return textMenu;
     }
 
     @Override
@@ -143,10 +119,10 @@ public class TextFragment extends Fragment {
         mainDisplay = new ReadView(getContext());
         mainDisplay.setContentWidth(screenSize.getWidth() - 80);
         mainDisplay.setContentHeight(screenSize.getHeight() - 80);
-        mainDisplay.setPadding(20,8,8,8);
+        mainDisplay.setPadding(20, 8, 8, 8);
         card.addView(mainDisplay);
 
-        txt = ((FullscreenActivity)rootActivity).getTxtDetail();
+        txt = ((FullscreenActivity) rootActivity).getTxtDetail();
 
         final Book book = new Book(getActivity(), new File(txt.getPath()), lineTotalNumber, lineCharacterNumber, txt.getHasReadPointer(), txt.getTotality(), screenSize.getHeight(), screenSize.getWidth());
 //        book.setLineTotalNumber(lineTotalNumber);
@@ -193,7 +169,7 @@ public class TextFragment extends Fragment {
                 float sensitivity = 100;
                 float minVelocityX = 20;
                 float minVelocityY = 20;
-                if (Math.abs(interval_X) > sensitivity && Math.abs(interval_X) > Math.abs(interval_Y*1.5) && velocityX != 0 && Math.abs(interval_X) > Math.abs(interval_Y)/2) {
+                if (Math.abs(interval_X) > sensitivity && Math.abs(interval_X) > Math.abs(interval_Y * 1.5) && velocityX != 0 && Math.abs(interval_X) > Math.abs(interval_Y) / 2) {
                     if (interval_X < 0) {
                         nextPage(book);
                     } else if (interval_X > 0) {
@@ -207,11 +183,11 @@ public class TextFragment extends Fragment {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                if (e.getRawX() >= screenSize.getWidth()/4 && e.getRawX() <= (screenSize.getWidth()/4*3) && e.getRawY() >= screenSize.getHeight()/4 && e.getRawY() <= (screenSize.getHeight()/4*3)) {
+                if (e.getRawX() >= screenSize.getWidth() / 4 && e.getRawX() <= (screenSize.getWidth() / 4 * 3) && e.getRawY() >= screenSize.getHeight() / 4 && e.getRawY() <= (screenSize.getHeight() / 4 * 3)) {
                     ((FullscreenActivity) rootActivity).toggle();
-                } else if (e.getRawX() > (screenSize.getWidth()/2)) {
+                } else if (e.getRawX() > (screenSize.getWidth() / 2)) {
                     nextPage(book);
-                } else if (e.getRawX() < (screenSize.getWidth()/2)) {
+                } else if (e.getRawX() < (screenSize.getWidth() / 2)) {
                     lastPage(book);
                 }
                 return super.onSingleTapConfirmed(e);
@@ -231,15 +207,15 @@ public class TextFragment extends Fragment {
         //设置SeekBar和百分比
         seekBarPercentage = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.seekBarPercentage);
         seekBar = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.seekBar);
-        seekBar.setMax((int)book.getTotality());
-        seekBar.setProgress((int)txt.getHasReadPointer());
+        seekBar.setMax((int) book.getTotality());
+        seekBar.setProgress((int) txt.getHasReadPointer());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
                 NumberFormat percentageFormat = NumberFormat.getPercentInstance();
                 percentageFormat.setMaximumFractionDigits(2);
-                percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+                percentage = percentageFormat.format((float) seekBar.getProgress() / seekBar.getMax());
                 seekBarPercentage.setText(percentage);
             }
 
@@ -262,11 +238,11 @@ public class TextFragment extends Fragment {
                 //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
                 NumberFormat percentageFormat = NumberFormat.getPercentInstance();
                 percentageFormat.setMaximumFractionDigits(2);
-                percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+                percentage = percentageFormat.format((float) seekBar.getProgress() / seekBar.getMax());
                 seekBarPercentage.setText(percentage);
 
                 //设置底栏信息
-                String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+                String b = ((FullscreenActivity) getActivity()).getBatteryPercent();
                 mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
             }
@@ -274,20 +250,28 @@ public class TextFragment extends Fragment {
         //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
         NumberFormat percentageFormat = NumberFormat.getPercentInstance();
         percentageFormat.setMaximumFractionDigits(2);
-        percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+        percentage = percentageFormat.format((float) seekBar.getProgress() / seekBar.getMax());
         seekBarPercentage.setText(percentage);
         //设置底栏信息
-        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        String b = ((FullscreenActivity) getActivity()).getBatteryPercent();
         mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
         //设置编码RadioButton
         RadioGroup encodeGroup = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encode_RadioGroup);
         RadioButton encodeRadioButton;
         switch (book.getCodingFormat()) {
-            case 2: encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GB2312);break;
-            case 3: encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GB18030);break;
-            case 4: encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_UTF8);break;
-            default: encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GBK);break;
+            case 2:
+                encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GB2312);
+                break;
+            case 3:
+                encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GB18030);
+                break;
+            case 4:
+                encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_UTF8);
+                break;
+            default:
+                encodeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.encodeFormat_GBK);
+                break;
         }
         encodeRadioButton.setChecked(true);
         encodeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -330,23 +314,50 @@ public class TextFragment extends Fragment {
         RadioGroup textSizeGroup = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_RadioGroup);
         RadioButton textSizeRadioButton;
         switch (((FullscreenActivity) getActivity()).getTextSize_Settings()) {
-            case 1: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_minimum); break;
-            case 2: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_small); break;
-            case 3: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_medium); break;
-            case 4: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_large); break;
-            case 5: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_maximum); break;
-            default: textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_medium); break;
+            case 1:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_minimum);
+                break;
+            case 2:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_small);
+                break;
+            case 3:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_medium);
+                break;
+            case 4:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_large);
+                break;
+            case 5:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_maximum);
+                break;
+            default:
+                textSizeRadioButton = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.textSize_medium);
+                break;
         }
         textSizeRadioButton.setChecked(true);
         textSizeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId) {
-                    case R.id.textSize_minimum: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 1); ((FullscreenActivity)getActivity()).setTextSize_Settings(1); break;
-                    case R.id.textSize_small: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 2); ((FullscreenActivity)getActivity()).setTextSize_Settings(2); break;
-                    case R.id.textSize_medium: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 3); ((FullscreenActivity)getActivity()).setTextSize_Settings(3); break;
-                    case R.id.textSize_large: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 4); ((FullscreenActivity)getActivity()).setTextSize_Settings(4); break;
-                    case R.id.textSize_maximum: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 5); ((FullscreenActivity)getActivity()).setTextSize_Settings(5); break;
+                    case R.id.textSize_minimum:
+                        Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 1);
+                        ((FullscreenActivity) getActivity()).setTextSize_Settings(1);
+                        break;
+                    case R.id.textSize_small:
+                        Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 2);
+                        ((FullscreenActivity) getActivity()).setTextSize_Settings(2);
+                        break;
+                    case R.id.textSize_medium:
+                        Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 3);
+                        ((FullscreenActivity) getActivity()).setTextSize_Settings(3);
+                        break;
+                    case R.id.textSize_large:
+                        Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 4);
+                        ((FullscreenActivity) getActivity()).setTextSize_Settings(4);
+                        break;
+                    case R.id.textSize_maximum:
+                        Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 5);
+                        ((FullscreenActivity) getActivity()).setTextSize_Settings(5);
+                        break;
                 }
                 changeTextSize();
                 reComputationCharacterNumber(book);
@@ -354,8 +365,8 @@ public class TextFragment extends Fragment {
             }
         });
         //设置夜间模式
-        final CheckBox checkBox = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.checkbox_nightShift);
-        final FrameLayout layout = view.findViewById(R.id.container_fragment);
+        checkBox = ((FullscreenActivity) rootActivity).getController().findViewById(R.id.checkbox_nightShift);
+        layout = view.findViewById(R.id.container_fragment);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -366,6 +377,7 @@ public class TextFragment extends Fragment {
                     //card.setRadius(20);
                     mainDisplay.invalidate();
                     checkBox.setText("关闭");
+                    ((FullscreenActivity) rootActivity).setNightModeCode(1);
                 } else {
                     mainDisplay.setTextColor(Color.rgb(0x00, 0x00, 0x00));
                     layout.setBackgroundColor(Color.rgb(0xff, 0xff, 0xff));
@@ -373,9 +385,13 @@ public class TextFragment extends Fragment {
                     //card.setRadius(20);
                     mainDisplay.invalidate();
                     checkBox.setText("开启");
+                    ((FullscreenActivity) rootActivity).setNightModeCode(0);
                 }
             }
         });
+
+        //夜间模式恢复
+        switchNightMode();
 
         return view;
     }
@@ -387,10 +403,10 @@ public class TextFragment extends Fragment {
         text = book.nextPage();
         book.setReadPointer(txt.getHasReadPointer());
         mainDisplay.setText(text);
-        seekBar.setProgress((int)book.getReadPointer());
+        seekBar.setProgress((int) book.getReadPointer());
 
         //设置底栏信息
-        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        String b = ((FullscreenActivity) getActivity()).getBatteryPercent();
         mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
         if (book.bookFullScreen.size() >= 0)
@@ -415,9 +431,9 @@ public class TextFragment extends Fragment {
             txt.setHasReadPointer(0);
             book.setReadPointer(0);
         }
-        seekBar.setProgress((int)book.getReadPointer());
+        seekBar.setProgress((int) book.getReadPointer());
         //设置底栏信息
-        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        String b = ((FullscreenActivity) getActivity()).getBatteryPercent();
         mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
         if (book.bookFullScreen.size() >= 0)
@@ -427,19 +443,29 @@ public class TextFragment extends Fragment {
     }
 
     public void changeTextSize() {
-        switch (((FullscreenActivity)getActivity()).getTextSize_Settings()) {
-            case 1: textSizePixel = 16; break;
-            case 2: textSizePixel = 32; break;
-            case 3: textSizePixel = 48; break;
-            case 4: textSizePixel = 60; break;
-            case 5: textSizePixel = 72; break;
+        switch (((FullscreenActivity) getActivity()).getTextSize_Settings()) {
+            case 1:
+                textSizePixel = 16;
+                break;
+            case 2:
+                textSizePixel = 32;
+                break;
+            case 3:
+                textSizePixel = 48;
+                break;
+            case 4:
+                textSizePixel = 60;
+                break;
+            case 5:
+                textSizePixel = 72;
+                break;
         }
         mainDisplay.setTextSize(textSizePixel);
     }
 
     public void reComputationCharacterNumber(Book book) {
-        lineCharacterNumber =(int) ((screenSize.getWidth()-80)/(mainDisplay.getTextSize()));
-        lineTotalNumber = (int) ((screenSize.getHeight() - 80)/(mainDisplay.getmLineSpacing()+mainDisplay.getTextSize()));
+        lineCharacterNumber = (int) ((screenSize.getWidth() - 80) / (mainDisplay.getTextSize()));
+        lineTotalNumber = (int) ((screenSize.getHeight() - 80) / (mainDisplay.getmLineSpacing() + mainDisplay.getTextSize()));
         book.setLineCharacterNumber(lineCharacterNumber);
         book.setLineTotalNumber(lineTotalNumber);
     }
@@ -448,6 +474,15 @@ public class TextFragment extends Fragment {
         text = book.readByte(txt.getHasReadPointer());
         book.setReadPointer(txt.getHasReadPointer());
         mainDisplay.setText(text);
+    }
+
+    public void switchNightMode() {
+        int r = ((FullscreenActivity) getActivity()).getNightModeCode();
+        if (r == 0) {
+            checkBox.setChecked(false);
+        } else {
+            checkBox.setChecked(true);
+        }
     }
 
     public Book getCurrenBook() {
